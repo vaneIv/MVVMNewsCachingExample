@@ -7,7 +7,9 @@ import com.example.mvvmnewscachingexample.databinding.ActivityMainBinding
 import com.example.mvvmnewscachingexample.features.bookmarks.BookmarksFragment
 import com.example.mvvmnewscachingexample.features.breakingnews.BreakingNewsFragment
 import com.example.mvvmnewscachingexample.features.searchnews.SearchNewsFragment
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding

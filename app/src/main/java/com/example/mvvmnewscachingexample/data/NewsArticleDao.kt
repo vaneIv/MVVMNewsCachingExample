@@ -1,4 +1,4 @@
-package com.example.mvvmnewscachingexample.features.data
+package com.example.mvvmnewscachingexample.data
 
 import androidx.room.Dao
 import androidx.room.Insert

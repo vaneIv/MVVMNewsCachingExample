@@ -1,4 +1,4 @@
-package com.example.mvvmnewscachingexample.features.api
+package com.example.mvvmnewscachingexample.api
 
 import com.example.mvvmnewscachingexample.BuildConfig
 import retrofit2.http.GET

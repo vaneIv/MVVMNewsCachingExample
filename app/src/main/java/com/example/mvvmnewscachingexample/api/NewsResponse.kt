@@ -1,3 +1,3 @@
-package com.example.mvvmnewscachingexample.features.api
+package com.example.mvvmnewscachingexample.api
 
 data class NewsResponse(val articles: List<NewsArticleDto>)

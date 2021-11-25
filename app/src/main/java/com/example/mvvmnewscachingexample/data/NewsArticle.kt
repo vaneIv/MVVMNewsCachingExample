@@ -1,4 +1,4 @@
-package com.example.mvvmnewscachingexample.features.data
+package com.example.mvvmnewscachingexample.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

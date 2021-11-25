@@ -1,4 +1,4 @@
-package com.example.mvvmnewscachingexample.features.api
+package com.example.mvvmnewscachingexample.api
 
 data class NewsArticleDto(
     val title: String?,
