@@ -1,5 +1,28 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
+ext {
+    // Sdk and tools
+    minSdkVersion = 21
+    targetSdkVersion = 31
+    compileSdkVersion = 31
+    buildToolsVersion = "30.0.3"
+
+    // App dependencies
+    appCompatVersion = "1.4.0"
+    materialVersion = "1.4.0"
+    constraintLayoutVersion = "2.1.2"
+    swipeRefreshLayoutVersion = "1.1.0"
+    hiltVersion = "2.40.1"
+    hiltLifecycleViewmodelVersion = "1.0.0-alpha03"
+    ktxVersion = "1.4.0"
+    coreKtxVersion = "1.7.0"
+    roomVersion = "2.4.0-beta02"
+    coroutinesVersion = "1.5.2"
+    pagingVersion = "3.1.0"
+    retrofitVersion = "2.9.0"
+    glideVersion = "4.12.0"
+}
+
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
