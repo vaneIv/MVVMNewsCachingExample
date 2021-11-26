@@ -5,6 +5,8 @@ import com.example.mvvmnewscachingexample.api.NewsApi
 import com.example.mvvmnewscachingexample.util.Resource
 import com.example.mvvmnewscachingexample.util.networkBoundResource
 import kotlinx.coroutines.flow.Flow
+import retrofit2.HttpException
+import java.io.IOException
 import javax.inject.Inject
 
 class NewsRepository @Inject constructor(
@@ -13,21 +15,10 @@ class NewsRepository @Inject constructor(
 ) {
     private val newsArticleDao = newsArticleDb.newsArticleDao()
 
-//    suspend fun getBreakingNews(): List<NewsArticle> {
-//        val response = newsApi.getBreakingNews()
-//        val serverBreakingNewsArticles = response.articles
-//        val breakingNewsArticles = serverBreakingNewsArticles.map { serverBreakingNewsArticles ->
-//            NewsArticle(
-//                title = serverBreakingNewsArticles.title,
-//                url = serverBreakingNewsArticles.url,
-//                thumbnailUrl = serverBreakingNewsArticles.urlToImage,
-//                isBookmarked = false
-//            )
-//        }
-//        return breakingNewsArticles
-//    }
-
-    fun getBreakingNews(): Flow<Resource<List<NewsArticle>>> =
+    fun getBreakingNews(
+        onFetchSuccess: () -> Unit,
+        onFetchFailed: (Throwable) -> Unit
+    ): Flow<Resource<List<NewsArticle>>> =
         networkBoundResource(
             query = {
                 newsArticleDao.getAllBreakingNewsArticles()
@@ -56,6 +47,13 @@ class NewsRepository @Inject constructor(
                     newsArticleDao.insertArticles(breakingNewsArticles)
                     newsArticleDao.insertBreakingNews(breakingNews)
                 }
+            },
+            onFetchSuccess = onFetchSuccess,
+            onFetchFailed = { t ->
+                if (t !is HttpException && t !is IOException) {
+                    throw t
+                }
+                onFetchFailed(t)
             }
         )
 }
