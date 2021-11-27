@@ -2,6 +2,7 @@ package com.example.mvvmnewscachingexample.features.breakingnews
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.mvvmnewscachingexample.data.NewsArticle
 import com.example.mvvmnewscachingexample.data.NewsRepository
 import com.example.mvvmnewscachingexample.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -60,6 +61,14 @@ class BreakingNewsViewModel @Inject constructor(
             viewModelScope.launch {
                 refreshTriggerChannel.send(Refresh.FORCE)
             }
+        }
+    }
+
+    fun onBookmarkClick(article: NewsArticle) {
+        val currentlyBookmarked = article.isBookmarked
+        val updateArticle = article.copy(isBookmarked = !currentlyBookmarked)
+        viewModelScope.launch {
+            repository.updateArticle(updateArticle)
         }
     }
 
