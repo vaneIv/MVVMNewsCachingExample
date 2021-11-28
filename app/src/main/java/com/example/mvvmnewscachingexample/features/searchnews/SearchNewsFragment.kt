@@ -14,24 +14,33 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.mvvmnewscachingexample.MainActivity
 import com.example.mvvmnewscachingexample.R
 import com.example.mvvmnewscachingexample.databinding.FragmentSearchNewsBinding
 import com.example.mvvmnewscachingexample.util.onQueryTextSubmit
+import com.example.mvvmnewscachingexample.util.showIfOrInvisible
+import com.example.mvvmnewscachingexample.util.showSnackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.filter
 
 @AndroidEntryPoint
-class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
+class SearchNewsFragment : Fragment(R.layout.fragment_search_news),
+    MainActivity.OnBottomNavigationFragmentReselectedListener {
 
     private val viewModel: SearchNewsViewModel by viewModels()
+
+    private var currentBinding: FragmentSearchNewsBinding? = null
+    private val binding get() = currentBinding!!
 
     private lateinit var newsArticleAdapter: NewsArticlePagingAdapter
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val binding = FragmentSearchNewsBinding.bind(view)
+        currentBinding = FragmentSearchNewsBinding.bind(view)
 
         newsArticleAdapter = NewsArticlePagingAdapter(
             onItemClick = { article ->
@@ -56,10 +65,35 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
 
             viewLifecycleOwner.lifecycleScope.launchWhenStarted {
                 viewModel.searchResults.collectLatest { data ->
-                    textViewInstructions.isVisible = false
-                    swipeRefreshLayoutSearchNews.isEnabled = true
                     newsArticleAdapter.submitData(data)
                 }
+            }
+
+            viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+                viewModel.hasCurrentQuery.collect { hasCurrentQuery ->
+                    textViewInstructions.isVisible = !hasCurrentQuery
+                    swipeRefreshLayoutSearchNews.isEnabled = hasCurrentQuery
+
+                    if (!hasCurrentQuery) {
+                        recyclerViewSearchNews.isVisible = false
+                    }
+                }
+            }
+
+            viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+                newsArticleAdapter.loadStateFlow
+                    .distinctUntilChangedBy { it.source.refresh }
+                    .filter { it.source.refresh is LoadState.NotLoading }
+                    .collect {
+                        if (viewModel.pendingScrollToTopAfterNewQuery) {
+                            recyclerViewSearchNews.scrollToPosition(0)
+                            viewModel.pendingScrollToTopAfterNewQuery = false
+                        }
+                        if (viewModel.pendingScrollToTopAfterRefresh && it.mediator?.refresh is LoadState.NotLoading) {
+                            recyclerViewSearchNews.scrollToPosition(0)
+                            viewModel.pendingScrollToTopAfterRefresh = false
+                        }
+                    }
             }
 
             viewLifecycleOwner.lifecycleScope.launchWhenStarted {
@@ -71,7 +105,12 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
                                 buttonRetry.isVisible = false
                                 swipeRefreshLayoutSearchNews.isRefreshing = true
                                 textViewNoResults.isVisible = false
-                                recyclerViewSearchNews.isVisible = newsArticleAdapter.itemCount > 0
+                                recyclerViewSearchNews.showIfOrInvisible {
+                                    !viewModel.newQueryInProgress && newsArticleAdapter.itemCount > 0
+                                }
+
+                                viewModel.refreshInProgress = true
+                                viewModel.pendingScrollToTopAfterRefresh = true
                             }
                             is LoadState.NotLoading -> {
                                 textViewError.isVisible = false
@@ -84,6 +123,9 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
                                             && loadState.source.append.endOfPaginationReached
 
                                 textViewNoResults.isVisible = noResults
+
+                                viewModel.refreshInProgress = false
+                                viewModel.newQueryInProgress = false
                             }
                             is LoadState.Error -> {
                                 swipeRefreshLayoutSearchNews.isRefreshing = false
@@ -102,6 +144,13 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
                                         ?: getString(R.string.unknown_error_occurred)
                                 )
                                 textViewError.text = errorMessage
+
+                                if (viewModel.refreshInProgress) {
+                                    showSnackbar(errorMessage)
+                                }
+                                viewModel.refreshInProgress = false
+                                viewModel.newQueryInProgress = false
+                                viewModel.pendingScrollToTopAfterRefresh = false
                             }
                         }
                     }
@@ -140,4 +189,12 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
             else -> super.onOptionsItemSelected(item)
         }
 
+    override fun onBottomNavigationFragmentReselected() {
+        binding.recyclerViewSearchNews.scrollToPosition(0)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        currentBinding = null
+    }
 }

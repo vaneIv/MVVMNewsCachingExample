@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.mvvmnewscachingexample.MainActivity
 import com.example.mvvmnewscachingexample.R
 import com.example.mvvmnewscachingexample.databinding.FragmentBreakingNewsBinding
 import com.example.mvvmnewscachingexample.shared.NewsArticleListAdapter
@@ -22,14 +23,18 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 
 @AndroidEntryPoint
-class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
+class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news),
+    MainActivity.OnBottomNavigationFragmentReselectedListener {
 
     private val viewModel: BreakingNewsViewModel by viewModels()
+
+    private var currentBinding: FragmentBreakingNewsBinding? = null
+    private val binding get() = currentBinding!!
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val binding = FragmentBreakingNewsBinding.bind(view)
+        currentBinding = FragmentBreakingNewsBinding.bind(view)
 
         val newsArticleAdapter = NewsArticleListAdapter(
             onItemClick = { article ->
@@ -115,4 +120,13 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
             }
             else -> super.onOptionsItemSelected(item)
         }
+
+    override fun onBottomNavigationFragmentReselected() {
+        binding.recyclerViewBreakingNews.scrollToPosition(0)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        currentBinding = null
+    }
 }
