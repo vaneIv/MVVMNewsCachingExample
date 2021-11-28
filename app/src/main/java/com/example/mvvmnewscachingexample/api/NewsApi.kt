@@ -16,6 +16,8 @@ interface NewsApi {
     @GET("top-headlines?country=us&pageSize=100")
     suspend fun getBreakingNews(): NewsResponse
 
+    @Headers("X-Api-Key: $API_KEY")
+    @GET("everything")
     suspend fun searchNews(
         @Query("q") query: String,
         @Query("page") page: Int,

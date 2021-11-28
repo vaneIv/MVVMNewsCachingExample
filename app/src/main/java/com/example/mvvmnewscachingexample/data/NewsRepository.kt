@@ -1,5 +1,8 @@
 package com.example.mvvmnewscachingexample.data
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import androidx.room.withTransaction
 import com.example.mvvmnewscachingexample.api.NewsApi
 import com.example.mvvmnewscachingexample.util.Resource
@@ -78,6 +81,13 @@ class NewsRepository @Inject constructor(
                 onFetchFailed(t)
             }
         )
+
+    fun getSearchResultPaged(query: String): Flow<PagingData<NewsArticle>> =
+        Pager(
+            config = PagingConfig(pageSize = 20, maxSize = 200),
+            remoteMediator = SearchNewsRemoteMediator(query, newsApi, newsArticleDb),
+            pagingSourceFactory = { newsArticleDao.getSearchResultArticlesPaged(query) }
+        ).flow
 
     fun getAllBookmarkedArticles(): Flow<List<NewsArticle>> =
         newsArticleDao.getALlBookmarkedArticles()

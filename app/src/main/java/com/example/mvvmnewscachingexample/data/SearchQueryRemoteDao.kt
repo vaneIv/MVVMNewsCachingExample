@@ -13,3 +13,4 @@ interface SearchQueryRemoteDao {
 
     @Query("SELECT * FROM search_query_remote_keys WHERE searchQuery = :searchQuery")
     suspend fun getRemoteKey(searchQuery: String): SearchQueryRemoteKey
+}
