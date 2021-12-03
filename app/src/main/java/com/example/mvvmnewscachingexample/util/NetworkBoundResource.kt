@@ -1,6 +1,5 @@
 package com.example.mvvmnewscachingexample.util
 
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collect
@@ -23,7 +22,6 @@ inline fun <ResultType, RequestType> networkBoundResource(
         }
 
         try {
-            delay(2000)
             saveFetchResult(fetch())
             onFetchSuccess()
             loading.cancel()
