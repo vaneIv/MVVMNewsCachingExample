@@ -74,7 +74,7 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news),
                     newsArticleAdapter.submitList(result.data) {
                         if (viewModel.pendingScrollToTopAfterRefresh) {
                             recyclerViewBreakingNews.scrollToPosition(0)
-                            viewModel.pendingScrollToTopAfterRefresh = true
+                            viewModel.pendingScrollToTopAfterRefresh = false
                         }
                     }
                 }

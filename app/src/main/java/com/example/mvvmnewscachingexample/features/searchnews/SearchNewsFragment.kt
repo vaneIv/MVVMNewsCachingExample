@@ -195,6 +195,7 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news),
 
     override fun onDestroyView() {
         super.onDestroyView()
+        binding.recyclerViewSearchNews.adapter = null
         currentBinding = null
     }
 }
